@@ -14,8 +14,16 @@
  * in this exercise. Just run learnyoumongo verify 
  * when you are ready with the installation.
  **/
+ 
+// 	set port
 
-// run mongod --version to check version
+	mongod --port 27017
+	
+//	set db path
+
+	mongod --dbpath=./data
+
+// 	run mongod --version to check version
 
 
 
