@@ -1,0 +1,522 @@
+/***************************************************
+ *  
+ *                   01 - MONGOD
+ *
+ ***************************************************/
+
+/**
+ * First lets get MongoDB installed. You can download 
+ * MongoDB from https://www.mongodb.org/downloads.
+ *
+ * We will also need to add it to your $PATH.
+ *
+ * You do not have to create any file with a solution 
+ * in this exercise. Just run learnyoumongo verify 
+ * when you are ready with the installation.
+ **/
+
+// run mongod --version to check version
+
+
+
+
+/***************************************************
+ *  
+ *                  02 - CONNECT
+ *
+ ***************************************************/
+
+/**
+ * Start mongod on port 27017 with data as dbpath
+ **/
+
+//  You may have to create the data directory:
+//  mkdir data
+
+//  To start mongo on port 27017, run:
+//  mongod --port 27017 --dbpath=./data
+
+
+
+
+/***************************************************
+ *  
+ *                   03 - FIND
+ *
+ ***************************************************/
+
+/**
+ * Here we will learn to search for documents.
+ *
+ * In this exercise the database name is learnyoumongo.
+ * So, the url would be something like:
+ *      monogodb://localhost:27017/learnyoumongo
+ *
+ * Use the parrots collection to find all documents 
+ * where age is greater than the first argument
+ * passed to your script.
+ *
+ * Using console.log, print the documents to stdout.
+ **/
+
+
+// To connect to the database, one can use something like this:
+
+var mongo = require('mongodb').MongoClient;
+
+mongo.connect('mongodb://localhost:27017/learnyoumongo', function(err, db) {
+    if (err) return console.error("Error:", err);
+    // get the collection called parrots
+    db.collection('parrots').find({
+        // and all entries with age greater than passed argument
+        age: { $gt : parseInt(process.argv[2]) }
+    }).toArray(function(err, documents) {
+        if (err) return console.error("Error:", err);
+        console.log(documents);
+    });
+    // close db when finished
+    db.close();
+});
+
+
+/***** Offical Answer *****/
+
+var mongo = require('mongodb').MongoClient
+var age = process.argv[2]
+
+var url = 'mongodb://localhost:27017/learnyoumongo'
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err
+    var parrots = db.collection('parrots')
+    parrots.find({
+        age: {
+            $gt: +age
+        }
+    }).toArray(function(err, docs) {
+        if (err) throw err
+        console.log(docs)
+        db.close()
+    })
+})
+
+
+
+
+/***************************************************
+ *  
+ *                04 - FIND PROJECT
+ *
+ ***************************************************/
+
+/**
+ * Here we will learn how to search for documents but 
+ * only fetch the fields we need. Also known as 
+ * projection in MongoDB.
+ * 
+ * Use the parrots collection from the database named 
+ * learnyoumongo to find all documents where age is 
+ * greater than the first argument passed to your script.
+ * 
+ * The difference from the last lesson will be that we 
+ * only want the name and age properties
+ *
+ * Using console.log, print the documents to stdout.
+ **/
+
+var mongo = require('mongodb').MongoClient;
+
+var url = 'mongodb://localhost:27017/learnyoumongo';
+var targetAge = parseInt(process.argv[2]);
+
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    
+    // select collection
+    db.collection('parrots').find({
+        // find matching documents in the collection
+        age: {
+            $gt : targetAge
+        }
+    },{
+        // specify fields to return (1 == keep)
+        name: 1,
+        age: 1,
+        _id: 0
+    }).toArray(function(err, documents) {
+        if (err) throw err;
+        console.log(documents);
+    });
+    
+    // close db when finished
+    db.close();
+})
+
+
+/***** Official Answer *****/
+
+var mongo = require('mongodb').MongoClient
+var age = process.argv[2]
+
+var url = 'mongodb://localhost:27017/learnyoumongo'
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err
+    var parrots = db.collection('parrots')
+    parrots.find({
+        age: {
+            $gt: +age
+        }
+    }, {
+        name: 1
+        , age: 1
+        , _id: 0
+    }).toArray(function(err, docs) {
+        if (err) throw err
+        console.log(docs)
+        db.close()
+    })
+})
+
+
+
+
+/***************************************************
+ *  
+ *                  05 - INSERT
+ *
+ ***************************************************/
+
+/**
+ * Connect to MongoDB on port 27017.
+ * 
+ * You should connect to the database named learnyoumongo 
+ * and insert a document into the docs collection. The 
+ * document should be a json document with the following 
+ * properties:
+ * 
+ *      `firstName`
+ *      `lastName`
+ * 
+ * firstName will be passed as the first argument to the lesson.
+ *
+ * lastName will be passed as the second argument to the lesson.
+ *
+ * Use console.log to print out the object used to 
+ * create the document.
+ * 
+ * Make sure you use JSON.stringify convert it to JSON.
+ **/
+
+var mongo = require('mongodb').MongoClient;
+var url = 'mongodb://localhost:27017/learnyoumongo'
+
+var doc =   {
+                firstName: process.argv[2],
+                lastName: process.argv[3]
+            };
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    // get the collection
+    var collection = db.collection('docs');
+    // insert document
+    collection.insert(doc, function(err, data) {
+        if (err) throw err;
+        console.log(JSON.stringify(doc));
+    });
+    // close the db
+    db.close();
+});
+
+
+
+
+/***************************************************
+ *  
+ *                  06 - UPDATE
+ *
+ ***************************************************/
+
+/**
+ * Here we are g oing to update a document in the 
+ * users collection.
+ * 
+ * The databse will be accessible via process.argv[2].
+ * 
+ * Say we have a user defined like:
+ * 
+ *  {
+ *      "name": "Tina",
+ *      "age": 30,
+ *      "username": "tinatime"
+ *  }
+ * 
+ * We want to change Tina's age from 30 to 40.
+ * 
+ * For the purpose of this lesson, assume that the 
+ * username property is unique.
+ **/
+
+var mongo = require('mongodb').MongoClient;
+
+var url = 'mongodb://localhost:27017/' +  process.argv[2];
+
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    var collection = db.collection('users');
+    collection.update({
+        name: 'Tina'
+    }, {
+        $set: {
+           age: 40
+        }
+    }, function(err) {
+        if (err) throw err;
+        db.close();
+    });
+});
+
+
+
+
+/***************************************************
+ *  
+ *                  07 - REMOVE
+ *
+ ***************************************************/
+
+/**
+ * This lesson involves removing a document with the given _id.
+ * 
+ * The database name will be accessible via process.argv[2];
+ * 
+ * The collection name will be passed as the second 
+ * argument to your script.
+ * 
+ * The _id will be passed as the third argument to your script.
+ **/
+
+var mongo = require('mongodb').MongoClient;
+
+var url = 'mongodb://localhost:27017/' + process.argv[2];
+
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    var collection = db.collection(process.argv[3]);
+    collection.remove({
+        _id: process.argv[4]
+    },  function(err) {
+        if (err) throw err;
+        db.close();
+    })
+});
+
+
+
+
+/***************************************************
+ *  
+ *                  08 - Count
+ *
+ ***************************************************/
+
+/**
+ * Here we will learn how to count the number of 
+ * documents that meet certain criteria.
+ * 
+ * Use the parrots collection from the database named
+ * learnyoumongo to count all the documents where age
+ * is greater than the first argument passed to your
+ * script.
+ * 
+ * Using console.log, print the number to stdout.
+ **/
+
+var mongo = require('mongodb').MongoClient;
+
+
+var url = 'mongodb://localhost:27017/learnyoumongo';
+
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    var collection = db.collection('parrots');
+    collection.count({
+        age: {
+            $gt : parseInt(process.argv[2])
+        }
+    }, function(err, count) {
+        if (err) throw err;
+        console.log(count);
+        db.close();
+    });
+});
+
+
+/***** Official Answer *****/
+
+var mongo = require('mongodb').MongoClient
+var age = process.argv[2]
+
+var url = 'mongodb://localhost:27017/learnyoumongo'
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err
+    var parrots = db.collection('parrots')
+    parrots.count({
+        age: {
+        $gt: +age
+        }
+    }, function(err, count) {
+        if (err) throw err
+        console.log(count)
+        db.close()
+    })
+})
+
+
+
+
+/***************************************************
+ *  
+ *                  09 - AGGREGATE
+ *
+ ***************************************************/
+
+
+/**
+ * Next up is aggregation. Aggregation allows one to do things like
+ * calculate the sum of a field of multiple documents or the average
+ * of a field of documents meeting particular criteria.
+ *
+ * Say you have a collection named prices. Each price 
+ * document is modeled like so:
+ *
+ *  {
+ *    "name": "Tshirt",
+ *    "size": "S",
+ *    "price": 10,
+ *    "quantity": 12
+ *    "meta": {
+ *      "vendor": "hanes",
+ *      "location": "US"
+ *    }
+ *  }
+ *
+ * In this exercise, we need to calculate the average price for all documents
+ * in the prices collection in the database named learnyoumongo that have
+ * the size that will be passed as the first argument to your script.
+ *
+ * Use console.log() to print the average price rounded to 2 decimal places
+ * to stdout after you have found it.
+ **/
+
+
+var mongo = require('mongodb').MongoClient;
+
+var url = 'mongodb://localhost:27017/learnyoumongo';
+
+
+mongo.connect(url, function(err, db) {
+    if (err) throw err;
+    var collection = db.collection('prices');
+    /**
+     *      $match
+     * 
+     * $match is used similar to the way a query is done. It allows
+     * us to select the documents that meet certain criteria.
+     *
+     * Ex. var match = { $match: { status: 'A' } }
+     *
+     * The above example will match all of the documents that have 
+     * a status property equal to A.
+     * 
+     *      $group
+     * 
+     * $group is what allows us to run operations on certain properties.
+     *
+     * So, say we wanted to get the sum of the values of the property value
+     * where status is equal to A and have it placed in the total property.
+     * 
+     * Ex.
+     *
+     * // [
+     * //  { status: 'A', value: 1 },
+     * //  { status: 'B', value: 2 },
+     * //  { status: 'A', value: 10 }
+     * // ]
+     *
+     * collection.aggregate([
+     *  { $match: { status: 'A' }},
+     *  { $group: {
+     *      id: 'total', // This can be an arbitrary string in this case
+     *      total: {
+     *          // $sum is the operator used here
+     *          $sum: '$value'
+     *      }
+     *  }}
+     *  ]).toArray(function(err, results) {
+     *      // handle error
+     *      console.log(results)
+     *      // => [
+     *      // =>   { _id: 'total', total: 11 }
+     *      // => ]
+     *  })
+     **/
+    //console.log('Looking for', process.argv[2], 'in:');
+    collection.aggregate([
+        { 
+            $match : {
+                size: process.argv[2]
+            }
+         }, 
+         { 
+            $group : {
+                _id: 'average',
+                average: {
+                    $avg: '$price'
+                }
+            }
+             
+         }]).toArray(function(err, results) {
+             if (err) throw err;
+             console.log(Number(results[0].average).toFixed(2));
+             db.close();
+         })
+});
+
+
+/***** Official Solution *****/
+
+var mongo = require('mongodb').MongoClient
+var size = process.argv[2]
+
+var url = 'mongodb://localhost:27017/learnyoumongo'
+
+mongo.connect(url, function(err, db) {
+  if (err) throw err
+  var prices = db.collection('prices')
+  prices.aggregate([
+    { $match: {
+      size: size
+    }}
+  , { $group: {
+      _id: 'average'
+    , average: {
+        $avg: '$price'
+      }
+    }}
+  ]).toArray(function(err, results) {
+    if (err) throw err
+    if (!results.length) {
+      throw new Error('No results found')
+    }
+    var o = results[0]
+    console.log(Number(o.average).toFixed(2))
+    db.close()
+  })
+})

@@ -1,0 +1,15 @@
+/***************************************************
+ *  
+ *                  02 - CONNECT
+ *
+ ***************************************************/
+
+/**
+ * Start mongod on port 27017 with data as dbpath
+ **/
+
+//  You may have to create the data directory:
+//  mkdir data
+
+//  To start mongo on port 27017, run:
+//  mongod --port 27017 --dbpath=./data
