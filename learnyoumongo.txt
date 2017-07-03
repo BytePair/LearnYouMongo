@@ -15,6 +15,17 @@
  * when you are ready with the installation.
  **/
  
+/***** Set up as service on windows *****/
+
+// install as service
+--dbpath J:/data/db --logpath J:/data/mongolog.log --install
+
+// then start as service
+net start MongoDB
+ 
+ 
+/***** Linux *****/
+ 
 // 	set port
 
 	mongod --port 27017
